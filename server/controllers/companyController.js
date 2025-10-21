@@ -2,6 +2,7 @@ import Company from "../models/Company.js";
 import bcrypt from "bcrypt"
 import {v2 as cloudinary} from "cloudinary"
 import generateToken from "../utils/generateTokens.js";
+import Job from "../models/Job.js";
 
 //register a new company
 export const registerCompany = async (req,res)=>{
@@ -74,12 +75,39 @@ export const loginCompany =async (req,res)=>{
 
 //get Company data
 export const getCompanyData=async (req,res)=>{
+        try {
+            const company=req.company;
 
+            return res.json({success:true,company});
+        } catch (error) {
+            return res.json({success:false,message:error.message});
+        }
 }
 
 //post a new job
 export const postJob = async (req,res)=>{
 
+    const {title,description,salary,location,level,category}=req.body;
+
+    const companyId=req.company._id;
+    
+    try {
+        const newJob=new Job({
+            title,
+            description,
+            salary,
+            location,
+            date:Date.now(),
+            companyId:companyId,
+            level,
+            category
+        });
+        await newJob.save();
+        return res.json({success:true,newJob});
+    } catch (error) {
+        return res.json({success:false,message:error.message});
+    }
+    
 }
 
 //get company job applicants
@@ -89,7 +117,16 @@ export const getCompanyJobApplicants=async(req,res)=>{
 
 //Get company posted Job
 export const getCompanyPostedJob=async(req,res)=>{
+    try {
+        const companyId=req.company._id;
 
+        const jobs=await Job.find({companyId});
+
+        //(Todo) add applicants data into it
+        return res.json({success:true,jobsData:jobs});
+    } catch (error) {
+        return res.json({success:false,message:error.message});
+    }
 }
 
 //change job application status
@@ -100,5 +137,18 @@ export const changeJobApplicationStatus=async (req,res)=>{
 
 //change job visiblity
 export const changeVisiblity = async (req,res)=>{
-    
+    try {
+        const {id}=req.body;
+        const companyId=req.company._id;
+        const job=await Job.findById(id);
+        
+        if(companyId.toString() === job.companyId.toString())
+        {
+            job.visible = !job.visible;
+        }
+        await job.save();
+        return res.json({success:true,job});
+    } catch (error) {
+        return res.json({success:false,message:error.message}); 
+    }
 }
