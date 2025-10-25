@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useRef,useState,useEffect } from 'react'
 import Quill from 'quill';
 import { JobCategories, JobLocations } from '../assets/assets';
+import { AppContext } from '../context/AppContext';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 
 const AddJob = () => {
@@ -14,6 +17,30 @@ const AddJob = () => {
 
   const editorRef = useRef(null);
   const quillRef = useRef(null);
+  const {backendUrl,companyToken}=useContext(AppContext);
+  const onSubmitHandler=async(e)=>{
+    e.preventDefault();
+    console.log(title,location,category,salary,level);
+    try {
+      const description=quillRef.current.root.innerHTML;
+      const {data}=await axios.post(backendUrl+"/api/company/post-job",
+        {title,description,salary,location,category,level},
+        {headers:{token:companyToken}}
+      )
+      if(data.success)
+      {
+        toast.success(data.message);
+        settitle('')
+        setsalary(0)
+        quillRef.current.root.innerHTML=""
+      }
+      else{
+        toast.error(data.message);
+      }
+      } catch (error) {
+      toast.error(error.message)
+    }
+  }
 
   useEffect(() => {
     //Initiate Qill only once
@@ -23,10 +50,11 @@ const AddJob = () => {
         theme:'snow',
       })
     }
+    
   }, [])
   
   return (
-    <form className='container p-4 flex flex-col w-full items-start gap-3'>
+    <form onSubmit={onSubmitHandler} className='container p-4 flex flex-col w-full items-start gap-3'>
         <div className='w-full'>
           <p className='mb-2'>Title</p>
           <input type="text" name="title" id="title" value={title} onChange={(e)=>settitle(e.target.value)} placeholder='Type here' required className='w-full max-w-lg px-3 py-2 border-2 border-gray-300 rounded'/>
@@ -60,7 +88,7 @@ const AddJob = () => {
           </div>
           <div>
             <p className='mb-2'>Job Level</p>
-            <select  className='w-full px-3 py-2 border-2 border-gray-300 rounded' onChange={(e)=>setlevel(e.target.level)}>
+            <select  className='w-full px-3 py-2 border-2 border-gray-300 rounded' onChange={(e)=>setlevel(e.target.value)}>
               <option value="Beginner level">Beginner level</option>
               <option value="Intermediate level">Intermediate level</option>
               <option value="Senior level">Senior level</option>

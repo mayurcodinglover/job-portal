@@ -1,11 +1,35 @@
-import React from 'react'
+import React, { useContext, useState } from 'react'
 import moment from 'moment'
 import {useNavigate} from 'react-router-dom'
 import { manageJobsData } from '../assets/assets'
+import { AppContext } from '../context/AppContext'
+import axios from 'axios'
 
 const ManageJobs = () => {
 
   const navigate=useNavigate();
+  const [jobs,setJobs]=useState(false);
+  const {backendUrl,companyToken}=useContext(AppContext);
+
+  const fetchCompanyJobs=async ()=>{
+    try {
+        const {data}=await axios.get(backendUrl+"/api/company/list-jobs",{headers:{token:companyToken}});
+        if(data.success)
+        {
+          setJobs(data.jobsData.reverse());
+          console.log(data.jobsData);
+          
+        }
+        else{
+          toast.error(data.message);
+        }
+    } catch (error) {
+      toast.error(data.message);
+    }
+  }
+  useEffect(() => {
+    fetchCompanyJobs();
+  }, []);
   return (
     <div className='container p-4 max-w-5xl'>
       <div className='overflow-x-auto'>
