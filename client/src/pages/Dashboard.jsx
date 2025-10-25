@@ -1,5 +1,5 @@
 import React from 'react'
-import { useContext } from 'react'
+import { useContext ,useEffect} from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { assets } from '../assets/assets'
 import { NavLink } from 'react-router-dom'
@@ -7,7 +7,17 @@ import { AppContext } from '../context/AppContext'
 
 const Dashboard = () => {
     const navigate=useNavigate();
-    const {companyData}=useContext(AppContext);
+    const {companyData,setcompanyToken,setcompanyData}=useContext(AppContext);
+
+    const logout=()=>{
+        setcompanyToken(null);
+        localStorage.removeItem('companyToken');
+        setcompanyData(null);
+        navigate('/');
+    }
+    useEffect(() => {
+        navigate('/dashboard/manage-jobs');
+    }, [companyData]);
   return (
     <div className='min-h-screen'>
         {/* Navbar for recuriter panel */}
@@ -21,7 +31,7 @@ const Dashboard = () => {
                         <img className='w-8 border rounded-full' src={companyData.image} alt="" />
                         <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12'>
                             <ul className='list-none m-0 p-2 bg-white rounded-md border text-sm'>
-                                <li className='py-1 px-2 cursor-pointer pr-10 '>Logout</li>
+                                <li className='py-1 px-2 cursor-pointer pr-10 ' onClick={logout}>Logout</li>
                             </ul>
                         </div>
                     </div>
