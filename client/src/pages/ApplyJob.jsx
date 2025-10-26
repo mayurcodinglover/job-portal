@@ -8,26 +8,31 @@ import kConvert from 'k-convert';
 import moment from "moment"
 import JobCard from '../components/JobCard';
 import Footer from '../components/Footer';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 const ApplyJob = () => {
   const {id}=useParams();
   const [jobData, setjobData] = useState(null);
-  const {Jobs}=useContext(AppContext);
+  const {Jobs,backendUrl}=useContext(AppContext);
 
   const fetchJob=async ()=>{
-    const data=Jobs.filter((job)=>job._id===id);
-    if(data.length!==0)
-    {
-      setjobData(data[0]);
-      console.log(data[0]);
+    try {
+        const {data}=await axios.get(backendUrl+`/api/jobs/${id}`);
+        if(data.success)
+        {
+          setjobData(data.job); 
+        }
+        else{
+          toast.error(data.message);
+        }
+    } catch (error) {
+      toast.error(error.message);
     }
   }
   useEffect(() => {
-    if(Jobs.length>0)
-    {
       fetchJob();
-    }
-  }, [id,Jobs]);
+  }, [id]);
   
   return jobData ? (
     <>
