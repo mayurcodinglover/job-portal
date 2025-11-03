@@ -20,13 +20,16 @@ await connectCloudinary();
 
 //Middleware
 app.use(cors());
-app.use(clerkMiddleware());
 
-// Webhook route BEFORE express.json() - uses raw body for signature verification
-app.post("/webhooks", express.raw({ type: 'application/json' }), clerkWebhooks);
+// IMPORTANT: Webhook route BEFORE clerkMiddleware and express.json()
+// Clerk webhooks need raw body for signature verification
+app.post('/webhooks', express.raw({ type: 'application/json' }), clerkWebhooks);
 
-// JSON parser for all other routes
+// Apply express.json() for all other routes
 app.use(express.json());
+
+// Apply Clerk middleware AFTER webhook route
+app.use(clerkMiddleware());
 
 //Routes
 app.get('/',(req,res)=>res.send("Api working"));

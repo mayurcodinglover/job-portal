@@ -24,7 +24,7 @@ export const AppContextProvider=(props)=>{
     const [companyToken, setcompanyToken] = useState(null);
     const [companyData, setcompanyData] = useState(null);
     const [userData,setUserData]=useState(null);
-    const [userApplications,setUserApplications]=useState(null);
+    const [userApplications,setUserApplications]=useState([]);
 
     const fetchJobs=async()=>{
         try {
@@ -72,6 +72,7 @@ export const AppContextProvider=(props)=>{
     const fetchUserData=async()=>{
         try {
             const token=await getToken();
+            console.log(token);
             const {data}=await axios.get(backendUrl+'/api/users/user',
                 {headers:{Authorization:`Bearer ${token}`}}
             )
@@ -86,6 +87,23 @@ export const AppContextProvider=(props)=>{
             toast.error(error.message); 
         }
     }
+    const fetchUserApplications=async()=>{
+        try {
+            const token=await getToken();
+            const {data}=await axios.get(backendUrl+"/api/users/applications",
+                {headers:{Authorization:`Bearer ${token}`}}
+            );
+            if(data.success)
+            {
+                setUserApplications(data.applications)
+            }
+            else{
+                toast.error(data.message);
+            }
+        } catch (error) {
+            toast.error(error.message);
+        }
+    }
     
      useEffect(() => {
         if(companyToken)
@@ -98,6 +116,7 @@ export const AppContextProvider=(props)=>{
         if(user)
         {
             fetchUserData();
+            fetchUserApplications();
         }
      },[user])
     const value={
@@ -108,7 +127,11 @@ export const AppContextProvider=(props)=>{
         setshowRecruiterLogin,
         companyToken,setcompanyToken,
         companyData,setcompanyData,
-        backendUrl
+        backendUrl,
+        userData,setUserData,
+        userApplications,setUserApplications,
+        fetchUserData,
+        fetchUserApplications
     };
     
     

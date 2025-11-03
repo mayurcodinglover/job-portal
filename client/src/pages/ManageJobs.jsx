@@ -5,11 +5,12 @@ import { manageJobsData } from '../assets/assets'
 import { AppContext } from '../context/AppContext'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import Loading from '../components/Loading'
 
 const ManageJobs = () => {
 
   const navigate=useNavigate();
-  const [jobs,setJobs]=useState([]);
+  const [jobs,setJobs]=useState(false);
   const {backendUrl,companyToken}=useContext(AppContext);
 
   const fetchCompanyJobs=async ()=>{
@@ -53,7 +54,11 @@ const ManageJobs = () => {
     
   }, []);
   
-  return (
+  return jobs ? jobs.length===0 ? 
+  (<div className='flex justify-center items-center h-[70vh]'>
+    <p className='text-xl sm:text-2xll'>No Jobs Available or Posted</p>
+  </div>)
+  :(
     <div className='container p-4 max-w-5xl'>
       <div className='overflow-x-auto'>
         <table className='min-w-full bg-white border border-gray-200 max-sm:text-sm'>
@@ -87,10 +92,7 @@ const ManageJobs = () => {
         <button onClick={()=>navigate('/dashboard/add-job')} className='cursor-pointer bg-black text-white py-2 px-4  rounded'>Add new Job</button>
       </div>
     </div>
-
-    
-
-  )
+  ):<Loading/>
 }
 
 export default ManageJobs
